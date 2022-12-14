@@ -18,7 +18,7 @@ use context::*;
 use state::*;
 
 #[program]
-pub mod core {
+pub mod core_ds {
 
     use super::*;
 

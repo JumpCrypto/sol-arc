@@ -1,0 +1,1 @@
+pub const STRING_MAX_SIZE:u64 = 256;

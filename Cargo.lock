@@ -413,7 +413,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f3ad85c1f65dc7b37604eb0e89748faf0b9653065f2a8ef69f96a687ec1e9279"
 
 [[package]]
-name = "core"
+name = "core_ds"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
@@ -1004,6 +1004,7 @@ name = "registry"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "core_ds",
 ]
 
 [[package]]
