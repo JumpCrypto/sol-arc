@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token::Mint;
 use std::collections::BTreeMap;
 
 use crate::account::*;
@@ -50,7 +51,7 @@ pub struct InitEntity<'info>{
         payer=payer,
         space=8+Entity::get_max_size() as usize+compute_comp_arr_max_size(&components.values().cloned().collect()), //It is expected this will get Realloc'd every time a component is added
         seeds = [
-            b"ntity",
+            b"entity",
             entity_id.to_be_bytes().as_ref(),
             registry_instance.key().as_ref()
         ],
@@ -59,6 +60,40 @@ pub struct InitEntity<'info>{
     pub entity: Box<Account<'info, Entity>>,
 
     // Only the Entity's Registry can make changes to the Entity
+    #[account(
+        seeds = [
+            b"registry_signer",
+        ],
+        bump,
+        seeds::program = registry_instance.registry.key()
+    )]
+    pub registry_signer: Signer<'info>
+}
+
+#[derive(Accounts)]
+pub struct MintARCNFT<'info>{
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+
+    pub registry_instance: Account<'info, RegistryInstance>,
+    pub entity: Box<Account<'info, Entity>>,
+    pub mint: Account<'info, Mint>,
+
+    #[account(
+        init,
+        payer=payer,
+        space=8+ARCNFT::get_max_size() as usize,
+        seeds=[
+            b"arcnft",
+            mint.key().as_ref(),
+            entity.key().as_ref()
+        ],
+        bump,
+    )]
+    pub arcnft: Account<'info, ARCNFT>,   
+
+    // Only the Entity's Registry can make mint the NFT
     #[account(
         seeds = [
             b"registry_signer",

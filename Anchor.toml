@@ -4,7 +4,7 @@ skip-lint = false
 [programs.localnet]
 core_ds = "GN5Ww5qa8ej4evFCJxMhV6AFEPKhD1Drdu8qYYptVgDJ"
 registry = "H5mieGWWK6qukHoNzbR6ysLxReeQC4JHZcNM6JkPQnm3"
-pfp-actions = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+tsab = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 
 
 [registry]

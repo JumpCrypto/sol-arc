@@ -1,0 +1,3 @@
+pub const METADATA_NAME_MAX_SIZE:u64 = 32;
+pub const METADATA_SYMBOL_MAX_SIZE:u64 = 32;
+pub const METADATA_URI_MAX_SIZE:u64 = 32;

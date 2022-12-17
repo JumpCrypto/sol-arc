@@ -20,14 +20,14 @@ use context::*;
 //use state::*;
 
 #[program]
-pub mod dominariregistry {
+pub mod registry {
 
     use std::collections::BTreeMap;
 
     use super::*;
 
-    pub fn initalize(ctx:Context<Initialize>, universe: Pubkey) -> Result<()> {
-        ctx.accounts.registry_config.core_ds = universe;
+    pub fn initalize(ctx:Context<Initialize>, core_ds: Pubkey) -> Result<()> {
+        ctx.accounts.registry_config.core_ds = core_ds;
         ctx.accounts.registry_config.components = 0;
         Ok(())
     }
@@ -39,7 +39,7 @@ pub mod dominariregistry {
      * This authority is the only one that can add action_bundles to a given instance
      */
     pub fn instance_registry(ctx:Context<InstanceRegistry>, instance:u64) -> Result<()> {
-        let universe = ctx.accounts.universe.to_account_info();
+        let core_ds = ctx.accounts.core_ds.to_account_info();
         let accounts = core_ds::cpi::accounts::InitRegistryInstance {
             payer: ctx.accounts.payer.to_account_info(),
             system_program: ctx.accounts.system_program.to_account_info(),
@@ -53,7 +53,7 @@ pub mod dominariregistry {
         let signer_seeds = &[registry_signer_seeds];
 
         let register_registry_ctx = CpiContext::new_with_signer(
-            universe,
+            core_ds,
             accounts,
             signer_seeds
         );
@@ -77,17 +77,18 @@ pub mod dominariregistry {
     pub fn register_action_bundle(ctx: Context<RegisterSystem>) -> Result<()> {
         ctx.accounts.action_bundle_registration.action_bundle = ctx.accounts.action_bundle.key();
         ctx.accounts.action_bundle_registration.instance = ctx.accounts.registry_instance.instance;
+        ctx.accounts.action_bundle_registration.can_mint = true;
         Ok(())
     }
 
-    pub fn add_components_to_action_bundle_registration(ctx:Context<AddComponentsToSystemRegistration>, components:Vec<Pubkey>) -> Result<()> {
+    pub fn add_components_to_action_bundle_registration(ctx:Context<AddComponentsToActionBundleRegistration>, components:Vec<Pubkey>) -> Result<()> {
         for comp in components {
             ctx.accounts.action_bundle_registration.components.insert(comp);
         }
         Ok(())
     }
 
-    pub fn mint_entity(ctx:Context<MintEntity>, entity_id: u64, components: BTreeMap<Pubkey, SerializedComponent>) -> Result<()> {
+    pub fn init_entity(ctx:Context<InitEntity>, entity_id: u64, components: BTreeMap<Pubkey, SerializedComponent>) -> Result<()> {
         let accounts = core_ds::cpi::accounts::InitEntity {
             entity: ctx.accounts.entity.to_account_info(),
             payer: ctx.accounts.payer.to_account_info(),
@@ -102,13 +103,39 @@ pub mod dominariregistry {
         let signer_seeds = &[registry_signer_seeds];
         
         core_ds::cpi::init_entity(CpiContext::new_with_signer(
-            ctx.accounts.universe.to_account_info(),
+            ctx.accounts.core_ds.to_account_info(),
             accounts,
             signer_seeds
         ), entity_id, components)?;
         
         Ok(())
     }
+
+    pub fn mint_arcnft(ctx:Context<MintARCNFT>) -> Result<()> {
+        let accounts = core_ds::cpi::accounts::MintARCNFT {
+            entity: ctx.accounts.entity.to_account_info(),
+            payer: ctx.accounts.payer.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+            registry_instance: ctx.accounts.registry_instance.to_account_info(),
+            registry_signer: ctx.accounts.registry_config.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+            arcnft: ctx.accounts.arcnft.to_account_info(),
+        };  
+        let registry_signer_seeds:&[&[u8]] = &[
+            b"registry_signer",
+            &[*ctx.bumps.get("registry_config").unwrap()]
+        ];
+        let signer_seeds = &[registry_signer_seeds];
+        
+        core_ds::cpi::mint_arcnft(CpiContext::new_with_signer(
+            ctx.accounts.core_ds.to_account_info(),
+            accounts,
+            signer_seeds
+        ))?;
+        
+        Ok(())
+    }
+
 
     pub fn req_add_component(ctx:Context<AddComponents>, components: Vec<(Pubkey,SerializedComponent)>) -> Result<()> {
         let accounts = core_ds::cpi::accounts::AddComponent {
@@ -124,7 +151,7 @@ pub mod dominariregistry {
         let signer_seeds = &[registry_signer_seeds];
         
         core_ds::cpi::add_components(CpiContext::new_with_signer(
-            ctx.accounts.universe.to_account_info(),
+            ctx.accounts.core_ds.to_account_info(),
             accounts,
             signer_seeds
         ), components)?;
@@ -145,7 +172,7 @@ pub mod dominariregistry {
         let signer_seeds = &[registry_signer_seeds];
         
         core_ds::cpi::remove_component(CpiContext::new_with_signer(
-            ctx.accounts.universe.to_account_info(),
+            ctx.accounts.core_ds.to_account_info(),
             accounts,
             signer_seeds
         ), components)?;
@@ -164,7 +191,7 @@ pub mod dominariregistry {
         let signer_seeds = &[registry_signer_seeds];
         
         core_ds::cpi::modify_components(CpiContext::new_with_signer(
-            ctx.accounts.universe.to_account_info(),
+            ctx.accounts.core_ds.to_account_info(),
             accounts,
             signer_seeds
         ), components)?;
@@ -186,7 +213,7 @@ pub mod dominariregistry {
         let signer_seeds = &[registry_signer_seeds];
         
         core_ds::cpi::remove_entity(CpiContext::new_with_signer(
-            ctx.accounts.universe.to_account_info(),
+            ctx.accounts.core_ds.to_account_info(),
             accounts,
             signer_seeds
         ))?;

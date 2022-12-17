@@ -46,11 +46,12 @@ impl MaxSize for ComponentSchema {
 pub struct ActionBundleRegistration{
     pub action_bundle: Pubkey,
     pub instance: u64,
+    pub can_mint: bool,
     pub components: BTreeSet<Pubkey>, //PDA of the Component Schema
 }
 
 impl MaxSize for ActionBundleRegistration {
     fn get_max_size() -> u64 {
-        return 32+8+4;
+        return 32+8+1+4;
     }
 }

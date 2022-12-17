@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token::Mint;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
@@ -44,7 +45,7 @@ pub struct InstanceRegistry<'info>{
     /// CHECK: Initialized via CPI
     #[account(mut)]
     pub registry_instance: AccountInfo<'info>,
-    pub universe: Program<'info, CoreDs>,
+    pub core_ds: Program<'info, CoreDs>,
 
     // Instance Authority is in charge of allowing new action_bundles onto this instance
     #[account(
@@ -126,7 +127,7 @@ pub struct RegisterSystem <'info> {
 
 #[derive(Accounts)]
 #[instruction(components: Vec<Pubkey>)]
-pub struct AddComponentsToSystemRegistration <'info> {
+pub struct AddComponentsToActionBundleRegistration <'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -165,7 +166,7 @@ pub struct AddComponentsToSystemRegistration <'info> {
 
 #[derive(Accounts)]
 #[instruction(entity_id:u64, components: BTreeMap<Pubkey, SerializedComponent>)]
-pub struct MintEntity<'info> {
+pub struct InitEntity<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -191,7 +192,43 @@ pub struct MintEntity<'info> {
         constraint = action_bundle_registration.action_bundle.key() == action_bundle.key() && check_sys_registry(&components.keys().cloned().collect(), &action_bundle_registration.components)
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
-    pub universe: Program<'info, CoreDs>,     
+    pub core_ds: Program<'info, CoreDs>,     
+}
+
+#[derive(Accounts)]
+pub struct MintARCNFT<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+
+    /// CHECK: Used to Sign Tx for the CPI
+    #[account(
+        seeds=[b"registry_signer"],
+        bump,
+    )]
+    pub registry_config: Account<'info, RegistryConfig>,
+    
+    pub entity: Box<Account<'info, Entity>>,
+    pub mint: Account<'info, Mint>,
+    
+    pub arcnft: AccountInfo<'info>,
+
+    #[account(
+        constraint = registry_instance.registry.key() == program_id.key() && registry_instance.instance == action_bundle_registration.instance
+    )]
+    pub registry_instance: Account<'info, RegistryInstance>,
+
+    #[account(
+        constraint = action_bundle_registration.action_bundle.key() == action_bundle.key()
+    )]
+    pub action_bundle: Signer<'info>,
+
+    // All action_bundles can make any entities they want
+    #[account(
+        constraint = action_bundle_registration.can_mint == true
+    )]
+    pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
+    pub core_ds: Program<'info, CoreDs>,     
 }
 
 #[derive(Accounts)]
@@ -223,7 +260,7 @@ pub struct AddComponents<'info>{
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
 
-    pub universe: Program<'info, CoreDs>, 
+    pub core_ds: Program<'info, CoreDs>, 
 }
 
 #[derive(Accounts)]
@@ -255,7 +292,7 @@ pub struct RemoveComponent<'info>{
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
 
-    pub universe: Program<'info, CoreDs>, 
+    pub core_ds: Program<'info, CoreDs>, 
 }
 
 #[derive(Accounts)]
@@ -283,7 +320,7 @@ pub struct ModifyComponent<'info>{
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
 
-    pub universe: Program<'info, CoreDs>, 
+    pub core_ds: Program<'info, CoreDs>, 
 }
 
 #[derive(Accounts)]
@@ -313,7 +350,7 @@ pub struct RemoveEntity<'info>{
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
 
-    pub universe: Program<'info, CoreDs>, 
+    pub core_ds: Program<'info, CoreDs>, 
 }
 
 

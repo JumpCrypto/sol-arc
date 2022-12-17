@@ -42,6 +42,12 @@ pub mod core_ds {
         Ok(())
     }
     
+    pub fn mint_arcnft(ctx:Context<MintARCNFT>) -> Result<()> {
+        ctx.accounts.arcnft.entity = ctx.accounts.entity.key();
+        ctx.accounts.arcnft.mint = ctx.accounts.mint.key();
+        Ok(())
+    }
+
     pub fn add_components(ctx:Context<AddComponent>, components:Vec<(Pubkey,SerializedComponent)>) -> Result<()> {
         for comp in components {
             ctx.accounts.entity.components.insert(comp.0, comp.1);
