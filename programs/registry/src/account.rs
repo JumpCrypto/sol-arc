@@ -30,7 +30,6 @@ impl MaxSize for InstanceAuthority {
     }
 }
 
-// PDA'd by Component ID which is just WorldSigner.Components + 1
 #[account]
 pub struct ComponentSchema{
     pub url: String,
@@ -45,7 +44,7 @@ impl MaxSize for ComponentSchema {
 #[account]
 pub struct ActionBundleRegistration{
     pub action_bundle: Pubkey,
-    pub instance: u64,
+    pub instances: BTreeSet<u64>,
     pub can_mint: bool,
     pub components: BTreeSet<Pubkey>, //PDA of the Component Schema
 }

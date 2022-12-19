@@ -22,7 +22,6 @@ pub struct Entity {
     pub instance: u64,
     pub registry: Pubkey,
     pub components: BTreeMap<Pubkey, SerializedComponent>,
-    //    pub registry_signer: Pubkey,
 }
 
 impl MaxSize for Entity {

@@ -1,6 +1,5 @@
 use anchor_lang::prelude::*;
-use std::collections::BTreeMap;
-
+use std::collections::{BTreeSet, BTreeMap};
 use core_ds::state::SerializedComponent;
 
 declare_id!("H5mieGWWK6qukHoNzbR6ysLxReeQC4JHZcNM6JkPQnm3");
@@ -76,7 +75,8 @@ pub mod registry {
 
     pub fn register_action_bundle(ctx: Context<RegisterSystem>) -> Result<()> {
         ctx.accounts.action_bundle_registration.action_bundle = ctx.accounts.action_bundle.key();
-        ctx.accounts.action_bundle_registration.instance = ctx.accounts.registry_instance.instance;
+        ctx.accounts.action_bundle_registration.instances = BTreeSet::new();
+        ctx.accounts.action_bundle_registration.instances.insert(ctx.accounts.registry_instance.instance);
         ctx.accounts.action_bundle_registration.can_mint = true;
         Ok(())
     }
@@ -84,6 +84,13 @@ pub mod registry {
     pub fn add_components_to_action_bundle_registration(ctx:Context<AddComponentsToActionBundleRegistration>, components:Vec<Pubkey>) -> Result<()> {
         for comp in components {
             ctx.accounts.action_bundle_registration.components.insert(comp);
+        }
+        Ok(())
+    }
+
+    pub fn add_instances_to_action_bundle_registration(ctx:Context<AddInstancesToActionBundleRegistration>, instances: Vec<u64>) -> Result<()> {
+        for instance in instances{
+            ctx.accounts.action_bundle_registration.instances.insert(instance);
         }
         Ok(())
     }
@@ -135,7 +142,6 @@ pub mod registry {
         
         Ok(())
     }
-
 
     pub fn req_add_component(ctx:Context<AddComponents>, components: Vec<(Pubkey,SerializedComponent)>) -> Result<()> {
         let accounts = core_ds::cpi::accounts::AddComponent {
@@ -221,5 +227,4 @@ pub mod registry {
         Ok(())
     }
 
-    
 }

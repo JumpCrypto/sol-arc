@@ -94,7 +94,7 @@ pub struct RegisterSystem <'info> {
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 
-    /// Universe Registry Instance Account
+    /// CoreDS Registry Instance Account
     /// Make sure that its a Registry instance that belongs to *this* Registry
     #[account(
         constraint = registry_instance.registry.key() == program_id.key()
@@ -132,7 +132,7 @@ pub struct AddComponentsToActionBundleRegistration <'info> {
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 
-    /// Universe Registry Instance Account
+    /// CoreDS Registry Instance Account
     /// Make sure that its a Registry instance that belongs to *this* Registry
     #[account(
         constraint = registry_instance.registry.key() == program_id.key()
@@ -147,7 +147,46 @@ pub struct AddComponentsToActionBundleRegistration <'info> {
     
     #[account(
         mut,
-        realloc = action_bundle_registration.to_account_info().data_len() + (components.len()*32) + components.len(),
+        realloc = action_bundle_registration.to_account_info().data_len() + (components.len()*32),
+        realloc::payer = payer,
+        realloc::zero = false,
+        seeds=[
+            b"action_bundle_registration",
+            registry_instance.key().as_ref(),
+            action_bundle.key().as_ref()
+        ],
+        bump,
+    )]
+    pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
+
+    /// CHECK: This can be any pubkey, but likely will be pubkey of 
+    /// PDA Signer from System
+    pub action_bundle: AccountInfo<'info>,
+}
+
+#[derive(Accounts)]
+#[instruction(instances: Vec<u64>)]
+pub struct AddInstancesToActionBundleRegistration <'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+
+    /// CoreDS Registry Instance Account
+    /// Make sure that its a Registry instance that belongs to *this* Registry
+    #[account(
+        constraint = registry_instance.registry.key() == program_id.key()
+    )]
+    pub registry_instance: Account<'info, RegistryInstance>,
+
+    /// Make sure the instance authority is of the Registry instance that's passed in
+    #[account(
+        constraint = instance_authority.instance == registry_instance.instance
+    )]
+    pub instance_authority: Account<'info, InstanceAuthority>,
+    
+    #[account(
+        mut,
+        realloc = action_bundle_registration.to_account_info().data_len() + (instances.len()*8),
         realloc::payer = payer,
         realloc::zero = false,
         seeds=[
@@ -183,7 +222,7 @@ pub struct InitEntity<'info> {
     pub entity: AccountInfo<'info>,
     
     #[account(
-        constraint = registry_instance.registry.key() == program_id.key() && registry_instance.instance == action_bundle_registration.instance
+        constraint = registry_instance.registry.key() == program_id.key() && action_bundle_registration.instances.contains(&registry_instance.instance)
     )]
     pub registry_instance: Account<'info, RegistryInstance>,
     pub action_bundle: Signer<'info>,
@@ -214,7 +253,7 @@ pub struct MintARCNFT<'info> {
     pub arcnft: AccountInfo<'info>,
 
     #[account(
-        constraint = registry_instance.registry.key() == program_id.key() && registry_instance.instance == action_bundle_registration.instance
+        constraint = registry_instance.registry.key() == program_id.key() && action_bundle_registration.instances.contains(&registry_instance.instance)
     )]
     pub registry_instance: Account<'info, RegistryInstance>,
 
@@ -223,7 +262,6 @@ pub struct MintARCNFT<'info> {
     )]
     pub action_bundle: Signer<'info>,
 
-    // All action_bundles can make any entities they want
     #[account(
         constraint = action_bundle_registration.can_mint == true
     )]
@@ -247,7 +285,7 @@ pub struct AddComponents<'info>{
 
     #[account(
         mut,
-        constraint = entity.registry.key() == program_id.key() && entity.instance == action_bundle_registration.instance
+        constraint = entity.registry.key() == program_id.key() && action_bundle_registration.instances.contains(&entity.instance)
     )]
     pub entity: Box<Account<'info, Entity>>,
     
@@ -279,7 +317,7 @@ pub struct RemoveComponent<'info>{
 
     #[account(
         mut,
-        constraint = entity.registry.key() == program_id.key() && entity.instance == action_bundle_registration.instance
+        constraint = entity.registry.key() == program_id.key() && action_bundle_registration.instances.contains(&entity.instance)
     )]
     pub entity: Account<'info, Entity>,
     
@@ -307,7 +345,7 @@ pub struct ModifyComponent<'info>{
 
     #[account(
         mut,
-        constraint = entity.registry.key() == program_id.key() && entity.instance == action_bundle_registration.instance
+        constraint = entity.registry.key() == program_id.key() && action_bundle_registration.instances.contains(&entity.instance)
     )]
     pub entity: Account<'info, Entity>,
     
@@ -338,7 +376,7 @@ pub struct RemoveEntity<'info>{
 
     #[account(
         mut,
-        constraint = entity.registry.key() == program_id.key() && entity.instance == action_bundle_registration.instance && entity.components.len() == 0
+        constraint = entity.registry.key() == program_id.key() && action_bundle_registration.instances.contains(&entity.instance) && entity.components.len() == 0
     )]
     pub entity: Account<'info, Entity>,
     
