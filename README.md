@@ -13,7 +13,7 @@ Modules:
 
 
 ## Abstract
-The primary goal for the ARC Data Standard is to provide a unified interface for on chain games on Solana, but due it's versatility and adaptability, it may uniquely be situated to solve some other problems in the Solana NFT ecosystem as well. 
+The primary goal for the ARC Data Standard is to provide a unified interface for on chain games on Solana. 
 
 ARC stands for “Action, Registry, Core”, and uses Entity-Component-System (ECS) style architecture often found in video game development under the hood. The key here is to separate *data* from its *execution,* while creating dynamic data structures that boost interoperability and composability. 
 
