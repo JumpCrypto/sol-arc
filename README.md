@@ -146,3 +146,5 @@ Action Bundles are where all serialization and deserialization logic takes place
     1. No. This is because the *rules* governing the data inside an entity are hard locked to the governance of that entity. 
 2. Can ComponentSchema Pubkeys be u64 schema_ids instead to save space?
     1. Possibly :- the deterministic nature of PDAs means we don’t need to worry about collisions, but theoretically, this job could be given up to the client to find a non collision u64 and submit that when registering a ComponentSchema (like we do for Entities).
+3. What are the account size requirements for entities?
+    1. Entity accounts (and other relevant accounts like ActionBundleRegistration) use the Solana realloc ability to resize accounts as new data is added and removed from those accounts. 
