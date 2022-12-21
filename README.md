@@ -2,12 +2,12 @@
 
 ARC stands for "Action Registry Core" and is a standard to represent on chain data using the Entity-Component pattern found in traditional game development. 
 
-Code Provided:
+Modules:
 - Core Data Standard Program (Code Complete)
 - Rust SDK (+WASM) for CoreDS (TODO)
 - Admin Registry (Code Complete)
 - Rust SDK (+WASM) for Admin Registry (TODO)
-- TSAB (Token Standard Action Bundle) similar to Metaplex Metadata (80% Complete)
+- TSAB (Token Standard Action Bundle)
 - Rust SDK (+WASM) for TSAB (TODO)
 - xNFT to view ARC NFTs (TODO)
 
@@ -52,9 +52,9 @@ An entity is the magical data bucket that keeps all sort of state through a BTre
 
 ```rs
 seeds = [
-	b"entity",
-  entity_id.to_be_bytes().as_ref(),
-  registry_instance.key().as_ref()
+    b"entity",
+    entity_id.to_be_bytes().as_ref(),
+    registry_instance.key().as_ref()
 ]
 
 #[account]
@@ -98,7 +98,7 @@ A Registry is a *community* or *set of communities* that interact with the same 
 
 → For games, Registries can encompass a full game, where the *instances* of the registry encompass each server of that game. Some games might have *lots* of instances; you might create a new instance every time you play the game with a friend, or maybe only a few instances, as official persistent servers. 
 
-→ For PFP-Style/Metaplex Metadata NFTs, there might exist a registry *per IP* with an instance per collection drop. This way, the governance of that IP is handled by the same registry for all the different collections they drop. Or they might have just one registry per collection, and isolate their governance per drop.
+→ For PFP-Style/Traditional NFTs, there might exist a registry *per IP* with an instance per collection drop. This way, the governance of that IP is handled by the same registry for all the different collections they drop. Or they might have just one registry per collection, and isolate their governance per drop.
 
 One benefit is by isolating governance by community, each community can setup their own system, and don’t need to rely on one over arching system, while still enjoying the benefits of one over arching data storage contract. This significantly boosts interoperability with wallets and explorers by standardizing data formats while still having a very flexible system for on chain data.
 
@@ -137,7 +137,7 @@ Action Bundles are where all serialization and deserialization logic takes place
 
 ## Use Cases
 1. Games
-2. PFP-Style/Metaplex Metadat NFTs
+2. PFP-Style/Traditional NFTs
 3. Off Chain Oracles
 
 ## FAQ
