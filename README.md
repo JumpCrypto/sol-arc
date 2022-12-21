@@ -1,9 +1,9 @@
-# ARC Data Standard
+# ARC Proposed Framework
 
 ARC stands for "Action Registry Core" and is a standard to represent on chain data using the Entity-Component pattern found in traditional game development. 
 
 Modules:
-- Core Data Standard Program (Code Complete)
+- Core Proposed Framework Program (Code Complete)
 - Rust SDK (+WASM) for CoreDS (TODO)
 - Admin Registry (Code Complete)
 - Rust SDK (+WASM) for Admin Registry (TODO)
@@ -13,7 +13,7 @@ Modules:
 
 
 ## Abstract
-The primary goal for the ARC Data Standard is to provide a unified interface for on chain games on Solana. 
+The primary goal for the ARC Proposed Framework is to provide a unified interface for on chain games on Solana. 
 
 ARC stands for “Action, Registry, Core”, and uses Entity-Component-System (ECS) style architecture often found in video game development under the hood. The key here is to separate *data* from its *execution,* while creating dynamic data structures that boost interoperability and composability. 
 
