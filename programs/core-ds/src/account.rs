@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use std::collections::BTreeMap;
 use crate::state::*;
 
-
+#[cfg_attr(feature = "sdk", derive(serde::Serialize, serde::Deserialize))]
 #[account]
 pub struct RegistryInstance {
     pub registry: Pubkey,
@@ -16,6 +16,7 @@ impl MaxSize for RegistryInstance {
     }
 }
 
+#[cfg_attr(feature = "sdk", derive(serde::Serialize, serde::Deserialize))]
 #[account]
 pub struct Entity {
     pub entity_id: u64,
@@ -31,6 +32,7 @@ impl MaxSize for Entity {
     }
 }
 
+#[cfg_attr(feature = "sdk", derive(serde::Serialize, serde::Deserialize))]
 #[account] 
 pub struct ARCNFT {
     pub entity: Pubkey,

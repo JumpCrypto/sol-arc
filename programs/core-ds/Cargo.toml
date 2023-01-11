@@ -14,7 +14,9 @@ no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
 default = []
+sdk = ["dep:serde"]
 
 [dependencies]
-anchor-lang = "0.25.0"
-anchor-spl = "0.25.0"
+anchor-lang = "0.26.0"
+anchor-spl = "0.26.0"
+serde = { version = "1.0.147", optional=true }

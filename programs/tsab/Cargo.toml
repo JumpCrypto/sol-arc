@@ -16,7 +16,7 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = "0.25.0"
-anchor-spl = "0.25.0"
+anchor-lang = "0.26.0"
+anchor-spl = "0.26.0"
 registry = { path="../registry", features=["cpi"]}
 core_ds = { path="../core-ds", features=["cpi"]}

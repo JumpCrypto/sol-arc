@@ -41,8 +41,10 @@ pub struct MintMetdata<'info> {
 
     // New Accounts created via CPI
     //// Entity
+    /// CHECK: Created via CPI
     pub entity: AccountInfo<'info>,
     //// ARCNFT
+    /// CHECK: Created via CPI
     pub arcnft: AccountInfo<'info>,
     
     // Registry Accounts

@@ -250,6 +250,7 @@ pub struct MintARCNFT<'info> {
     pub entity: Box<Account<'info, Entity>>,
     pub mint: Account<'info, Mint>,
     
+    /// CHECK: Created in CoreDS
     pub arcnft: AccountInfo<'info>,
 
     #[account(
