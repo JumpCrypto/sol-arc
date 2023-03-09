@@ -28,11 +28,7 @@ pub struct InitRegistryInstance <'info> {
 
     // Only the Registry can implment new instances of itself. It's left up to the registry on how to implement this.
     #[account(
-        seeds = [
-            SEEDS_REGISTRYSIGNER
-        ],
-        bump,
-        seeds::program = registry.key()
+        owner = registry.key()
     )]
     pub registry_signer: Signer<'info>
 }
@@ -61,11 +57,7 @@ pub struct InitEntity<'info>{
 
     // Only the Entity's Registry can make changes to the Entity
     #[account(
-        seeds = [
-            SEEDS_REGISTRYSIGNER,
-        ],
-        bump,
-        seeds::program = registry_instance.registry.key()
+        owner = registry_instance.registry.key()
     )]
     pub registry_signer: Signer<'info>
 }
@@ -121,11 +113,7 @@ pub struct AddComponent<'info> {
 
     // Only the Entity's registry can make changes to the Entity
     #[account(
-        seeds = [
-            SEEDS_REGISTRYSIGNER
-        ],
-        bump,
-        seeds::program = entity.registry.key()
+        owner = entity.registry.key()
     )]
     pub registry_signer: Signer<'info>
 }
@@ -147,11 +135,7 @@ pub struct RemoveComponent<'info> {
 
     // Only the Entity's registry can make changes to the Entity
     #[account(
-        seeds = [
-            SEEDS_REGISTRYSIGNER,
-        ],
-        bump,
-        seeds::program = entity.registry.key()
+        owner = entity.registry.key()
     )]
     pub registry_signer: Signer<'info>
 }
@@ -164,11 +148,7 @@ pub struct ModifyComponent<'info> {
 
     // Only the Entity's registry can make changes to the Entity
     #[account(
-        seeds = [
-            SEEDS_REGISTRYSIGNER,
-        ],
-        bump,
-        seeds::program = entity.registry.key()
+        owner = entity.registry.key()
     )]
     pub registry_signer: Signer<'info>
 }
@@ -188,11 +168,7 @@ pub struct RemoveEntity<'info>{
 
     // Only the Entity's registry can make changes to the Entity
     #[account(
-        seeds = [
-            SEEDS_REGISTRYSIGNER,
-        ],
-        bump,
-        seeds::program = entity.registry.key()
+        owner = entity.registry.key()
     )]
     pub registry_signer: Signer<'info>
 }
