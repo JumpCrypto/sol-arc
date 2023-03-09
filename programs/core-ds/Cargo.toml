@@ -20,3 +20,4 @@ sdk = ["dep:serde"]
 anchor-lang = "0.26.0"
 anchor-spl = "0.26.0"
 serde = { version = "1.0.147", optional=true }
+solana-program = "=1.14.11"
