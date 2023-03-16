@@ -161,7 +161,6 @@ pub struct RemoveEntity<'info>{
     
     #[account(
         mut,
-        constraint = entity.components.len() == 0, // Can only delete empty Entities
         close = benefactor
     )]
     pub entity: Account<'info, Entity>,
