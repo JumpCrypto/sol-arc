@@ -5,16 +5,12 @@ use std::collections::BTreeSet;
 
 use crate::account::*;
 use crate::constant::*;
+use crate::registry;
 
-use core_ds::{
-    self,
-    account::*,
-    program::CoreDs,
-    state::SerializedComponent
-};
+use core_ds::{self, account::*, program::CoreDs, state::SerializedComponent};
 
 #[derive(Accounts)]
-pub struct Initialize<'info>{
+pub struct Initialize<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -29,8 +25,8 @@ pub struct Initialize<'info>{
     pub registry_config: Account<'info, RegistryConfig>,
 }
 
-#[derive(Accounts)] 
-pub struct InstanceRegistry<'info>{
+#[derive(Accounts)]
+pub struct InstanceRegistry<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -58,13 +54,12 @@ pub struct InstanceRegistry<'info>{
         bump,
         space=8+InstanceAuthority::get_max_size() as usize,
     )]
-    pub instance_authority: Account<'info, InstanceAuthority>
-
+    pub instance_authority: Account<'info, InstanceAuthority>,
 }
 
 #[derive(Accounts)]
 #[instruction(schema:String)]
-pub struct RegisterComponent<'info>{
+pub struct RegisterComponent<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -89,7 +84,7 @@ pub struct RegisterComponent<'info>{
 }
 
 #[derive(Accounts)]
-pub struct RegisterSystem <'info> {
+pub struct RegisterSystem<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -97,7 +92,7 @@ pub struct RegisterSystem <'info> {
     /// CoreDS Registry Instance Account
     /// Make sure that its a Registry instance that belongs to *this* Registry
     #[account(
-        constraint = registry_instance.registry.key() == program_id.key()
+        constraint = registry_instance.registry.key() == registry::id(),
     )]
     pub registry_instance: Account<'info, RegistryInstance>,
 
@@ -106,7 +101,7 @@ pub struct RegisterSystem <'info> {
         constraint = instance_authority.instance == registry_instance.instance
     )]
     pub instance_authority: Account<'info, InstanceAuthority>,
-    
+
     #[account(
         init,
         payer=payer,
@@ -120,14 +115,14 @@ pub struct RegisterSystem <'info> {
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
 
-    /// CHECK: This can be any pubkey, but likely will be pubkey of 
+    /// CHECK: This can be any pubkey, but likely will be pubkey of
     /// PDA Signer from System
     pub action_bundle: AccountInfo<'info>,
 }
 
 #[derive(Accounts)]
 #[instruction(components: Vec<Pubkey>)]
-pub struct AddComponentsToActionBundleRegistration <'info> {
+pub struct AddComponentsToActionBundleRegistration<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -135,7 +130,7 @@ pub struct AddComponentsToActionBundleRegistration <'info> {
     /// CoreDS Registry Instance Account
     /// Make sure that its a Registry instance that belongs to *this* Registry
     #[account(
-        constraint = registry_instance.registry.key() == program_id.key()
+        constraint = registry_instance.registry.key() == registry::id()
     )]
     pub registry_instance: Account<'info, RegistryInstance>,
 
@@ -144,7 +139,7 @@ pub struct AddComponentsToActionBundleRegistration <'info> {
         constraint = instance_authority.instance == registry_instance.instance
     )]
     pub instance_authority: Account<'info, InstanceAuthority>,
-    
+
     #[account(
         mut,
         realloc = action_bundle_registration.to_account_info().data_len() + (components.len()*32),
@@ -159,14 +154,14 @@ pub struct AddComponentsToActionBundleRegistration <'info> {
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
 
-    /// CHECK: This can be any pubkey, but likely will be pubkey of 
+    /// CHECK: This can be any pubkey, but likely will be pubkey of
     /// PDA Signer from System
     pub action_bundle: AccountInfo<'info>,
 }
 
 #[derive(Accounts)]
 #[instruction(instances: Vec<u64>)]
-pub struct AddInstancesToActionBundleRegistration <'info> {
+pub struct AddInstancesToActionBundleRegistration<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -174,7 +169,7 @@ pub struct AddInstancesToActionBundleRegistration <'info> {
     /// CoreDS Registry Instance Account
     /// Make sure that its a Registry instance that belongs to *this* Registry
     #[account(
-        constraint = registry_instance.registry.key() == program_id.key()
+        constraint = registry_instance.registry.key() == registry::id()
     )]
     pub registry_instance: Account<'info, RegistryInstance>,
 
@@ -183,7 +178,7 @@ pub struct AddInstancesToActionBundleRegistration <'info> {
         constraint = instance_authority.instance == registry_instance.instance
     )]
     pub instance_authority: Account<'info, InstanceAuthority>,
-    
+
     #[account(
         mut,
         realloc = action_bundle_registration.to_account_info().data_len() + (instances.len()*8),
@@ -198,7 +193,7 @@ pub struct AddInstancesToActionBundleRegistration <'info> {
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
 
-    /// CHECK: This can be any pubkey, but likely will be pubkey of 
+    /// CHECK: This can be any pubkey, but likely will be pubkey of
     /// PDA Signer from System
     pub action_bundle: AccountInfo<'info>,
 }
@@ -216,13 +211,13 @@ pub struct InitEntity<'info> {
         bump,
     )]
     pub registry_config: Account<'info, RegistryConfig>,
-    
+
     /// CHECK: Initalized via CPI
     #[account(mut)]
     pub entity: AccountInfo<'info>,
-    
+
     #[account(
-        constraint = registry_instance.registry.key() == program_id.key() && action_bundle_registration.instances.contains(&registry_instance.instance)
+        constraint = registry_instance.registry.key() == registry::id() && action_bundle_registration.instances.contains(&registry_instance.instance)
     )]
     pub registry_instance: Account<'info, RegistryInstance>,
     pub action_bundle: Signer<'info>,
@@ -231,7 +226,7 @@ pub struct InitEntity<'info> {
         constraint = action_bundle_registration.action_bundle.key() == action_bundle.key() && check_sys_registry(&components.keys().cloned().collect(), &action_bundle_registration.components)
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
-    pub core_ds: Program<'info, CoreDs>,     
+    pub core_ds: Program<'info, CoreDs>,
 }
 
 #[derive(Accounts)]
@@ -246,15 +241,15 @@ pub struct MintARCNFT<'info> {
         bump,
     )]
     pub registry_config: Account<'info, RegistryConfig>,
-    
+
     pub entity: Box<Account<'info, Entity>>,
     pub mint: Account<'info, Mint>,
-    
+
     /// CHECK: Created in CoreDS
     pub arcnft: AccountInfo<'info>,
 
     #[account(
-        constraint = registry_instance.registry.key() == program_id.key() && action_bundle_registration.instances.contains(&registry_instance.instance)
+        constraint = registry_instance.registry.key() == registry::id() && action_bundle_registration.instances.contains(&registry_instance.instance)
     )]
     pub registry_instance: Account<'info, RegistryInstance>,
 
@@ -267,12 +262,12 @@ pub struct MintARCNFT<'info> {
         constraint = action_bundle_registration.can_mint == true
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
-    pub core_ds: Program<'info, CoreDs>,     
+    pub core_ds: Program<'info, CoreDs>,
 }
 
 #[derive(Accounts)]
 #[instruction(components: Vec<(Pubkey, SerializedComponent)>)]
-pub struct AddComponents<'info>{
+pub struct AddComponents<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -286,12 +281,12 @@ pub struct AddComponents<'info>{
 
     #[account(
         mut,
-        constraint = entity.registry.key() == program_id.key() && action_bundle_registration.instances.contains(&entity.instance)
+        constraint = entity.registry.key() == registry::id() && action_bundle_registration.instances.contains(&entity.instance)
     )]
     pub entity: Box<Account<'info, Entity>>,
-    
+
     pub action_bundle: Signer<'info>,
-    
+
     // System is allowed to modify the component it's adding
     // System is a signer
     #[account(
@@ -299,12 +294,12 @@ pub struct AddComponents<'info>{
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
 
-    pub core_ds: Program<'info, CoreDs>, 
+    pub core_ds: Program<'info, CoreDs>,
 }
 
 #[derive(Accounts)]
 #[instruction(components: Vec<Pubkey>)]
-pub struct RemoveComponent<'info>{
+pub struct RemoveComponent<'info> {
     #[account(mut)]
     pub benefactor: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -318,12 +313,12 @@ pub struct RemoveComponent<'info>{
 
     #[account(
         mut,
-        constraint = entity.registry.key() == program_id.key() && action_bundle_registration.instances.contains(&entity.instance)
+        constraint = entity.registry.key() == registry::id() && action_bundle_registration.instances.contains(&entity.instance)
     )]
     pub entity: Account<'info, Entity>,
-    
+
     pub action_bundle: Signer<'info>,
-    
+
     // System is allowed to modify the component it's adding
     // System is a signer
     #[account(
@@ -331,12 +326,12 @@ pub struct RemoveComponent<'info>{
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
 
-    pub core_ds: Program<'info, CoreDs>, 
+    pub core_ds: Program<'info, CoreDs>,
 }
 
 #[derive(Accounts)]
 #[instruction(components: Vec<Pubkey>, data:Vec<Vec<u8>>)]
-pub struct ModifyComponent<'info>{
+pub struct ModifyComponent<'info> {
     //Used to Sign Tx for the CPI
     #[account(
         seeds=[b"registry_signer"],
@@ -346,12 +341,12 @@ pub struct ModifyComponent<'info>{
 
     #[account(
         mut,
-        constraint = entity.registry.key() == program_id.key() && action_bundle_registration.instances.contains(&entity.instance)
+        constraint = entity.registry.key() == registry::id() && action_bundle_registration.instances.contains(&entity.instance)
     )]
     pub entity: Account<'info, Entity>,
-    
+
     pub action_bundle: Signer<'info>,
-    
+
     // System is allowed to modify the component it's adding
     // System is a signer
     #[account(
@@ -359,11 +354,11 @@ pub struct ModifyComponent<'info>{
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
 
-    pub core_ds: Program<'info, CoreDs>, 
+    pub core_ds: Program<'info, CoreDs>,
 }
 
 #[derive(Accounts)]
-pub struct RemoveEntity<'info>{
+pub struct RemoveEntity<'info> {
     #[account(mut)]
     pub benefactor: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -377,25 +372,27 @@ pub struct RemoveEntity<'info>{
 
     #[account(
         mut,
-        constraint = entity.registry.key() == program_id.key() && action_bundle_registration.instances.contains(&entity.instance) && entity.components.len() == 0
+        constraint = entity.registry.key() == registry::id() && action_bundle_registration.instances.contains(&entity.instance) && entity.components.len() == 0
     )]
     pub entity: Account<'info, Entity>,
-    
+
     pub action_bundle: Signer<'info>,
-    
+
     // ANY registered action_bundle can close an empty entity
     #[account(
         constraint = action_bundle_registration.action_bundle.key() == action_bundle.key()
     )]
     pub action_bundle_registration: Account<'info, ActionBundleRegistration>,
 
-    pub core_ds: Program<'info, CoreDs>, 
+    pub core_ds: Program<'info, CoreDs>,
 }
-
 
 /*************************************************UTIL Functions */
 
-pub fn check_sys_registry(components: &Vec<Pubkey>, action_bundle_components: &BTreeSet<Pubkey>) -> bool {
+pub fn check_sys_registry(
+    components: &Vec<Pubkey>,
+    action_bundle_components: &BTreeSet<Pubkey>,
+) -> bool {
     for comp in components {
         if !action_bundle_components.contains(comp) {
             return false;
